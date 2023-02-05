@@ -41,7 +41,7 @@ The project consists of three microservices:
 1. Clone the repository to your local machine.
 
 ```bash
-git clone 
+git clone https://github.com/ajitkumargiri/banking-services.git
 
 ```
 
