@@ -1,0 +1,55 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+      routes:
+        - id: account-service
+          uri: lb://account-service
+          predicates:
+            - Path=/customers/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: myCircuitBreaker
+                fallbackUri: forward:/serviceNotAvailable
+                statusCodes:
+                  - 500
+                  - "NOT_FOUND"
+        - id: transaction-service
+          uri: lb://transaction-service
+          predicates:
+            - Path=/accounts/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: serviceNotAvail
+                fallbackUri: forward:/serviceNotAvailable
+server:
+  port: 8765
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+    healthcheck:
+      enabled: true
+
+
+management:
+  endpoints:
+    enabled-by-default: true
+
+
+# Resiliece4j Configuration
+

@@ -1,0 +1,132 @@
+2023-02-05 11:45:58 info: tempDirectory:c:\Users\x088082\.vscode\extensions\embold-vscode.embold-0.1.4\temp
+2023-02-05 11:45:58 info: Extraction complete for source: c:\Users\x088082\.vscode\extensions\embold-vscode.embold-0.1.4\resources\embold-scanner-archive.zip, destination: c:\Users\x088082\.vscode\extensions\embold-vscode.embold-0.1.4\temp
+2023-02-05 11:45:58 info: Congratulations, your extension "Embold" is now active!
+2023-02-05 11:46:15 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/.apt_generated
+2023-02-05 11:46:15 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:15 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/.apt_generated_tests
+2023-02-05 11:46:15 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:17 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/application.yaml
+2023-02-05 11:46:17 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/db
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/logback.xml
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/dto/CustomerDTO.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/entity/Customer.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/exception/Error.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/config/CacheConfig.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/dto/TransactionDTO.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/config/SwaggerConfig.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/dto/CurrentAccountDTO.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/entity/CurrentAccount.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/mapper/CustomerMapper.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/service/CustomerService.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/AccountServiceApplication.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/mapper/CustomerMapperImpl.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/AccountServiceApplication%241.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/mapper/CurrentAccountMapper.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/service/CustomerServiceImpl.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/controller/CustomerController.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/exception/ApiExceptionHandler.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/exception/BadRequestException.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/repository/CustomerRepository.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/service/CurrentAccountService.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/validation/ValidationConstant.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/mapper/CurrentAccountMapperImpl.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/controller/model/TransactionModel.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/service/CurrentAccountServiceImpl.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/controller/CurrentAccountController.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/controller/TransactionServiceClient.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/exception/ResourceNotFoundException.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/repository/CurrentAccountRepository.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/controller/model/CurrentAccountModel.class
+2023-02-05 11:46:18 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/exception/InsufficientBalanceException.class
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:18 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/test-classes/com/ajit/account/utils/MockData.class
+2023-02-05 11:46:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/test-classes/com/ajit/account/mapper/CustomerMapperTest.class
+2023-02-05 11:46:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/test-classes/com/ajit/account/AccountServiceApplicationTests.class
+2023-02-05 11:46:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/test-classes/com/ajit/account/mapper/CurrentAccountMapperTest.class
+2023-02-05 11:46:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/test-classes/com/ajit/account/service/CustomerServiceImplTest.class
+2023-02-05 11:46:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/test-classes/com/ajit/account/controller/CustomerControllerTest.class
+2023-02-05 11:46:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/test-classes/com/ajit/account/service/CurrentAccountServiceImplTest.class
+2023-02-05 11:46:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:46:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:47:50 info: tempDirectory:c:\Users\x088082\.vscode\extensions\embold-vscode.embold-0.1.4\temp
+2023-02-05 11:47:50 info: Extraction complete for source: c:\Users\x088082\.vscode\extensions\embold-vscode.embold-0.1.4\resources\embold-scanner-archive.zip, destination: c:\Users\x088082\.vscode\extensions\embold-vscode.embold-0.1.4\temp
+2023-02-05 11:47:50 info: Congratulations, your extension "Embold" is now active!
+2023-02-05 11:52:24 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/test-classes/com/ajit/account/utils/MockData.class
+2023-02-05 11:52:24 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:52:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/site
+2023-02-05 11:52:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/db
+2023-02-05 11:52:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/jacoco.exec
+2023-02-05 11:52:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/maven-status
+2023-02-05 11:52:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/test-classes
+2023-02-05 11:52:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/maven-archiver
+2023-02-05 11:52:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/surefire-reports
+2023-02-05 11:52:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/generated-sources
+2023-02-05 11:52:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/logback.xml
+2023-02-05 11:52:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/generated-test-sources
+2023-02-05 11:52:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/dto
+2023-02-05 11:52:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/entity
+2023-02-05 11:52:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/mapper
+2023-02-05 11:52:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/service
+2023-02-05 11:52:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/exception
+2023-02-05 11:52:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/repository
+2023-02-05 11:52:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/validation
+2023-02-05 11:52:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/controller/model
+2023-02-05 11:52:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target/classes/com/ajit/account/controller/TransactionServiceClient.class
+2023-02-05 11:52:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:52:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:52:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:52:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:52:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:52:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:52:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:52:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:52:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:52:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:52:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:52:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:52:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:52:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:52:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:52:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:52:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:52:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:52:25 error: SQLITE_ERROR: no such table: issues
+2023-02-05 11:52:25 info: file:///c%3A/ajit/front-end/github/banking-services/account-service/target
+2023-02-05 11:52:25 error: SQLITE_ERROR: no such table: issues

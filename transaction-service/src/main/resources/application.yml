@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: transaction-service
+  h2:
+    console.enabled: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+  jackson:
+    serialization:
+      indent-output: true
+  datasource:
+    url: jdbc:h2:mem:transactiondb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=LEGACY
+    username: sa
+    password: password
+    driverClassName: org.h2.Driver
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: false
+
+server:
+  port: 8002
+#logging:
+#  level:
+#    root: debug
+
+#eureka
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    service-url:
+      default-zone: http://localhost:8761/eureka/
+

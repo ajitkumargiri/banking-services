@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: account-service
+  h2:
+    console.enabled: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+  jackson:
+    serialization:
+      indent-output: true
+  datasource:
+    url: jdbc:h2:mem:accountdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=LEGACY
+    username: sa
+    password: password
+    driverClassName: org.h2.Driver
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: true
+
+server:
+  port: 8001
+
+
+#eureka
+eureka:
+  client:
+    service-url:
+      default-zone: http://localhost:8761/eureka/
+    fetch-registry: true
+
+  instance:
+    #indicates the frequency the client sends heartbeats to server to indicate that it is alive.
+    lease-renewal-interval-in-seconds: 30
+    #indicates the duration the server waits since it received the last heartbeat before it can evict an instance from its registry.
+    lease-expiration-duration-in-seconds: 90
+    prefer-ip-address: true
+
+#load balancing
+ribbon:
+  eureka:
+    enabled: true
