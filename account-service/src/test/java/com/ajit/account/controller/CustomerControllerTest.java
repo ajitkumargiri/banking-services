@@ -5,6 +5,7 @@ import com.ajit.account.mapper.CustomerMapper;
 import com.ajit.account.service.CustomerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -30,6 +31,8 @@ class CustomerControllerTest {
 
     @MockBean
     private CustomerService customerService;
+   @MockBean
+    private TransactionServiceClient transactionServiceClient;
     @Autowired
     private CustomerMapper customerMapper;
 
@@ -47,6 +50,7 @@ class CustomerControllerTest {
     @Transactional
     void getCustomerInfo() throws Exception {
         given(customerService.findCustomerById(1l)).willReturn(Optional.of(customerMapper.mapToDto(customer)));
+        given(transactionServiceClient.getAllTransactionsByAccountId(1l)).willReturn(Mockito.anyList());
         mockMvc.perform(get("/customers/1")
                                         .accept(MediaType.APPLICATION_JSON_VALUE))
                         .andExpect(status().isOk())
@@ -59,6 +63,7 @@ class CustomerControllerTest {
     @Transactional
     void getCustomerNotFoundError() throws Exception {
         given(customerService.findCustomerById(1l)).willReturn(Optional.empty());
+        given(transactionServiceClient.getAllTransactionsByAccountId(1l)).willReturn(Mockito.anyList());
         mockMvc.perform(get("/customers/1")
                                         .accept(MediaType.APPLICATION_JSON_VALUE))
                         .andExpect(status().isNotFound());

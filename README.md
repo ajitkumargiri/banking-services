@@ -83,7 +83,6 @@ mvn spring-boot:run
 
 The application will be running on `http://localhost:8002`.
 
-
 7. Start front-end
 
 ```bash
@@ -104,3 +103,11 @@ The API documentation is available in Swagger.
 `http://localhost:8001/swagger-ui/index.html`  - account-service
 
 `http://localhost:8002/swagger-ui/index.html` - transaction-service
+
+
+### CICD with github action.
+
+Deployed microservice to azure spring app using github action.
+
+
+![](assets/20230205_223022_image.png)
