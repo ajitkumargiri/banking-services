@@ -1,4 +1,116 @@
 ```
+import org.apache.spark.sql.{Dataset, Encoder, Encoders, Row, SparkSession}
+import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.StructType
+
+// Initialize Spark Session
+val spark = SparkSession.builder()
+  .appName("CompanyProcessing")
+  .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+  .getOrCreate()
+
+// Define Encoders for CompanyCore and ModelWrapper
+implicit val companyCoreEncoder: Encoder[CompanyCore] = Encoders.bean(classOf[CompanyCore])
+implicit val modelWrapperEncoder: Encoder[ModelWrapper] = Encoders.bean(classOf[ModelWrapper])
+
+// Step 1: Load the Parquet file into a Dataset[CompanyCore]
+val companyDataset: Dataset[CompanyCore] = spark.read
+  .parquet("/mnt/yourcompany/input-data/company-source-data.parquet")
+  .as[CompanyCore]
+
+// Initialize RuleExecutor
+val ruleExecutor = new RuleExecutor()
+
+// Step 2: Repartition Data for Parallel Processing
+val numPartitions = 100  // Adjust this based on your cluster and data size
+val repartitionedData = companyDataset.repartition(numPartitions)
+
+// Step 3: Process Data in Parallel Using mapPartitions
+val transformedRdd: RDD[Row] = repartitionedData.rdd.mapPartitions { iterator =>
+  iterator.map { record =>
+    val modelWrapper = ruleExecutor.executeTransformationRule(record)  // Apply transformation rule to each record
+    val companyList = Option(modelWrapper.company).toList
+    val apcList = modelWrapper.apcList
+    val arList = modelWrapper.agreementRoleList
+    val prList = modelWrapper.partyRelationshipList
+
+    // Create Row for each extracted entity
+    Row(companyList, apcList, arList, prList)  // Return a Row containing the lists
+  }
+}
+
+// Step 4: Convert RDD back to DataFrame
+val transformedDf = spark.createDataFrame(transformedRdd, StructType(Seq(
+  StructField("company", ArrayType(classOf[Company]), nullable = true),
+  StructField("apc", ArrayType(classOf[Apc]), nullable = true),
+  StructField("ar", ArrayType(classOf[AgreementRole]), nullable = true),
+  StructField("pr", ArrayType(classOf[PartyRelationship]), nullable = true)
+)))
+
+// Step 5: Extract each individual dataset and write them
+
+val companyDatasetResult = transformedDf.select("company").withColumnRenamed("company", "company")
+val apcDatasetResult = transformedDf.select("apc").withColumnRenamed("apc", "apc")
+val arDatasetResult = transformedDf.select("ar").withColumnRenamed("ar", "ar")
+val prDatasetResult = transformedDf.select("pr").withColumnRenamed("pr", "pr")
+
+// Write Company Dataset to Parquet
+companyDatasetResult.write
+  .mode("overwrite")
+  .parquet("/mnt/output/company-parquet")
+
+// Write APC Dataset to Parquet
+apcDatasetResult.write
+  .mode("overwrite")
+  .parquet("/mnt/output/apc-parquet")
+
+// Write AR Dataset to Parquet
+arDatasetResult.write
+  .mode("overwrite")
+  .parquet("/mnt/output/ar-parquet")
+
+// Write PR Dataset to Parquet
+prDatasetResult.write
+  .mode("overwrite")
+  .parquet("/mnt/output/pr-parquet")
+
+// Alternatively, write to Delta Tables
+companyDatasetResult.write
+  .format("delta")
+  .mode("overwrite")
+  .save("/mnt/output/company-delta")
+
+apcDatasetResult.write
+  .format("delta")
+  .mode("overwrite")
+  .save("/mnt/output/apc-delta")
+
+arDatasetResult.write
+  .format("delta")
+  .mode("overwrite")
+  .save("/mnt/output/ar-delta")
+
+prDatasetResult.write
+  .format("delta")
+  .mode("overwrite")
+  .save("/mnt/output/pr-delta")
+
+// Show results for validation
+companyDatasetResult.show()
+apcDatasetResult.show()
+arDatasetResult.show()
+prDatasetResult.show()
+
+
+
+
+
+
+
+
+
+
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.rdd.RDD
