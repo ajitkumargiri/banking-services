@@ -1,4 +1,66 @@
 ```
+import org.apache.spark.sql.{Dataset, Encoder, Encoders, SparkSession}
+import org.apache.spark.sql.functions._
+
+val spark = SparkSession.builder()
+  .appName("Parallel Processing for ModelWrapper")
+  .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+  .getOrCreate()
+
+// Define Encoders
+implicit val companyCoreEncoder: Encoder[CompanyCore] = Encoders.bean(classOf[CompanyCore])
+implicit val modelWrapperEncoder: Encoder[ModelWrapper] = Encoders.bean(classOf[ModelWrapper])
+implicit val partyEncoder: Encoder[Party] = Encoders.bean(classOf[Party])
+implicit val apcEncoder: Encoder[Apc] = Encoders.bean(classOf[Apc])
+implicit val arEncoder: Encoder[AgreementRole] = Encoders.bean(classOf[AgreementRole])
+implicit val prEncoder: Encoder[PartyRelationship] = Encoders.bean(classOf[PartyRelationship])
+
+// Step 1: Read the Parquet data
+val companyDataset: Dataset[CompanyCore] = spark.read
+  .parquet("/mnt/company/input-data/company-source-data.parquet")
+  .as[CompanyCore]
+
+// Initialize RuleExecutor
+val ruleExecutor = new RuleExecutor()
+
+// Step 2: Apply transformation in parallel using `mapPartitions`
+val modelWrapperDS: Dataset[ModelWrapper] = companyDataset.repartition(100).mapPartitions { iterator =>
+  iterator.map { record =>
+    ruleExecutor.executeTransformationRule(record) // Parallel transformation
+  }
+}.as[ModelWrapper]
+
+// Step 3: Extract inner objects **from ModelWrapper**
+val companyDF = modelWrapperDS.map(_.getCompany).toDF()
+val apcDF = modelWrapperDS.flatMap(_.getApcList).toDF()
+val arDF = modelWrapperDS.flatMap(_.getAgreementRoleList).toDF()
+val prDF = modelWrapperDS.flatMap(_.getPartyRelationshipList).toDF()
+
+// Step 4: Write all datasets **in parallel**
+companyDF.write.mode("overwrite").parquet("/mnt/output/company-parquet")
+apcDF.write.mode("overwrite").parquet("/mnt/output/apc-parquet")
+arDF.write.mode("overwrite").parquet("/mnt/output/ar-parquet")
+prDF.write.mode("overwrite").parquet("/mnt/output/pr-parquet")
+
+// Alternative: Write to Delta Tables
+companyDF.write.format("delta").mode("overwrite").save("/mnt/output/company-delta")
+apcDF.write.format("delta").mode("overwrite").save("/mnt/output/apc-delta")
+arDF.write.format("delta").mode("overwrite").save("/mnt/output/ar-delta")
+prDF.write.format("delta").mode("overwrite").save("/mnt/output/pr-delta")
+
+// Show results for validation
+companyDF.show()
+apcDF.show()
+arDF.show()
+prDF.show()
+
+
+
+
+
+
+
+
 import org.apache.spark.sql.{Dataset, Encoder, Encoders, Row, SparkSession}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.functions._
