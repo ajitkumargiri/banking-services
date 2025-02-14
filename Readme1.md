@@ -1,4 +1,321 @@
 ```
+Use Case: Nested and Real-World Complex Object Mapping with MapStruct in Spring Boot
+
+Scenario:
+
+Imagine a user management system where a User entity has nested objects like Address and Role. We need to map this complex entity into a UserDTO that also includes these nested structures properly formatted.
+
+
+---
+
+1. Project Dependencies (Spring Boot + MapStruct)
+
+Maven Configuration
+
+<dependencies>
+    <!-- Spring Boot Starter -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter</artifactId>
+    </dependency>
+
+    <!-- MapStruct -->
+    <dependency>
+        <groupId>org.mapstruct</groupId>
+        <artifactId>mapstruct</artifactId>
+        <version>1.5.5.Final</version>
+    </dependency>
+
+    <!-- MapStruct Processor -->
+    <dependency>
+        <groupId>org.mapstruct</groupId>
+        <artifactId>mapstruct-processor</artifactId>
+        <version>1.5.5.Final</version>
+        <scope>provided</scope>
+    </dependency>
+
+    <!-- Lombok (optional but recommended) -->
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <scope>provided</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok-mapstruct-binding</artifactId>
+        <version>0.2.0</version>
+        <scope>provided</scope>
+    </dependency>
+</dependencies>
+
+
+---
+
+2. Define Entity Classes (Nested Structure)
+
+User Entity with Nested Address and Role
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.List;
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String firstName;
+    private String lastName;
+    private String email;
+
+    @Embedded
+    private Address address;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "user_roles",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private List<Role> roles;
+}
+
+Address as Embedded Object
+
+import jakarta.persistence.Embeddable;
+import lombok.*;
+
+@Embeddable
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class Address {
+    private String street;
+    private String city;
+    private String state;
+    private String zipCode;
+}
+
+Role Entity
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class Role {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String roleName;
+}
+
+
+---
+
+3. Define DTO Classes
+
+UserDTO with Flattened Address and Role List
+
+import lombok.*;
+
+import java.util.List;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserDTO {
+    private Long id;
+    private String fullName;
+    private String email;
+    private String street;
+    private String city;
+    private String state;
+    private String zipCode;
+    private List<String> roles;
+}
+
+
+---
+
+4. Implement MapStruct Mappers
+
+Address Mapper
+
+import org.mapstruct.Mapper;
+
+@Mapper(componentModel = "spring")
+public interface AddressMapper {
+    default String mapAddress(Address address) {
+        return address.getStreet() + ", " + address.getCity() + ", " + address.getState() + " " + address.getZipCode();
+    }
+}
+
+Role Mapper
+
+import org.mapstruct.Mapper;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Mapper(componentModel = "spring")
+public interface RoleMapper {
+    default List<String> mapRoles(List<Role> roles) {
+        return roles.stream().map(Role::getRoleName).collect(Collectors.toList());
+    }
+}
+
+User Mapper with Nested Object Handling
+
+import org.mapstruct.*;
+
+@Mapper(componentModel = "spring", uses = {AddressMapper.class, RoleMapper.class})
+public interface UserMapper {
+
+    @Mapping(source = "firstName", target = "fullName", qualifiedByName = "combineName")
+    @Mapping(source = "address.street", target = "street")
+    @Mapping(source = "address.city", target = "city")
+    @Mapping(source = "address.state", target = "state")
+    @Mapping(source = "address.zipCode", target = "zipCode")
+    @Mapping(source = "roles", target = "roles")
+    UserDTO toUserDTO(User user);
+
+    @Named("combineName")
+    default String combineName(String firstName, String lastName) {
+        return firstName + " " + lastName;
+    }
+}
+
+
+---
+
+5. Implement Service Layer
+
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class UserService {
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
+
+    public UserService(UserRepository userRepository, UserMapper userMapper) {
+        this.userRepository = userRepository;
+        this.userMapper = userMapper;
+    }
+
+    public List<UserDTO> getAllUsers() {
+        return userRepository.findAll()
+                             .stream()
+                             .map(userMapper::toUserDTO)
+                             .collect(Collectors.toList());
+    }
+
+    public UserDTO getUserById(Long id) {
+        User user = userRepository.findById(id)
+                                  .orElseThrow(() -> new RuntimeException("User not found"));
+        return userMapper.toUserDTO(user);
+    }
+}
+
+
+---
+
+6. Implement Controller Layer
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/users")
+public class UserController {
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDTO> getUser(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getUserById(id));
+    }
+}
+
+
+---
+
+7. Example JSON Output
+
+Database Entry (User)
+
+{
+  "id": 1,
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "address": {
+    "street": "123 Main St",
+    "city": "Springfield",
+    "state": "IL",
+    "zipCode": "62704"
+  },
+  "roles": [
+    { "id": 1, "roleName": "ADMIN" },
+    { "id": 2, "roleName": "USER" }
+  ]
+}
+
+Mapped DTO Output
+
+{
+  "id": 1,
+  "fullName": "John Doe",
+  "email": "john.doe@example.com",
+  "street": "123 Main St",
+  "city": "Springfield",
+  "state": "IL",
+  "zipCode": "62704",
+  "roles": ["ADMIN", "USER"]
+}
+
+
+---
+
+Key Takeaways
+
+✅ Handles nested objects properly using multiple mappers.
+✅ Uses @Mapping for precise field mappings.
+✅ Uses @Named methods for custom logic like full name generation.
+✅ Easily integrates with Spring Boot (componentModel = "spring").
+✅ Optimized for real-world scenarios with address and role lists.
+
+Would you like to add further enhancements, such as bi-directional mapping or DTO-to-Entity conversion?
+
+
+
+
+
+
+
+
 Using MapStruct in a Spring Boot application is an efficient way to handle object mapping. Below are the best practices and steps to set it up properly:
 
 
