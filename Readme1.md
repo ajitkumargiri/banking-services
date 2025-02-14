@@ -1,4 +1,191 @@
 ```
+Using MapStruct in a Spring Boot application is an efficient way to handle object mapping. Below are the best practices and steps to set it up properly:
+
+
+---
+
+1. Add Dependencies
+
+For Maven:
+
+<dependencies>
+    <!-- MapStruct -->
+    <dependency>
+        <groupId>org.mapstruct</groupId>
+        <artifactId>mapstruct</artifactId>
+        <version>1.5.5.Final</version>
+    </dependency>
+    
+    <!-- MapStruct Annotation Processor -->
+    <dependency>
+        <groupId>org.mapstruct</groupId>
+        <artifactId>mapstruct-processor</artifactId>
+        <version>1.5.5.Final</version>
+        <scope>provided</scope>
+    </dependency>
+    
+    <!-- Lombok (if using Lombok with MapStruct) -->
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <scope>provided</scope>
+    </dependency>
+
+    <!-- Lombok MapStruct Binding -->
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok-mapstruct-binding</artifactId>
+        <version>0.2.0</version>
+        <scope>provided</scope>
+    </dependency>
+</dependencies>
+
+For Gradle:
+
+dependencies {
+    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+
+    // If using Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+}
+
+
+---
+
+2. Create DTOs and Entities
+
+Entity Class
+
+@Entity
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String firstName;
+    private String lastName;
+    private String email;
+    
+    // Getters and Setters (or use Lombok @Data)
+}
+
+DTO Class
+
+public class UserDTO {
+    private Long id;
+    private String fullName;
+    private String email;
+    
+    // Getters and Setters (or use Lombok @Data)
+}
+
+
+---
+
+3. Create a Mapper Interface
+
+import org.mapstruct.*;
+import org.mapstruct.factory.Mappers;
+
+@Mapper(componentModel = "spring")  // Integrates with Spring
+public interface UserMapper {
+    
+    UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
+
+    @Mapping(source = "firstName", target = "fullName", qualifiedByName = "combineName")
+    UserDTO toUserDTO(User user);
+
+    @Named("combineName")
+    default String combineName(String firstName, String lastName) {
+        return firstName + " " + lastName;
+    }
+}
+
+
+---
+
+4. Use Mapper in Service Layer
+
+@Service
+public class UserService {
+    
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
+
+    @Autowired
+    public UserService(UserRepository userRepository, UserMapper userMapper) {
+        this.userRepository = userRepository;
+        this.userMapper = userMapper;
+    }
+
+    public UserDTO getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return userMapper.toUserDTO(user);
+    }
+}
+
+
+---
+
+5. Use in Controller
+
+@RestController
+@RequestMapping("/users")
+public class UserController {
+    
+    private final UserService userService;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDTO> getUser(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getUserById(id));
+    }
+}
+
+
+---
+
+Best Practices
+
+1. Use @Mapper(componentModel = "spring"): This ensures Spring manages the mapper as a bean.
+
+
+2. Use @Mapping for Custom Mapping: Helps with field renaming and transformations.
+
+
+3. Use @Named for Custom Methods: Allows reusable custom conversions.
+
+
+4. Leverage @MappingTarget for Updates: Instead of creating new objects.
+
+@Mapping(target = "id", ignore = true)
+void updateUserFromDto(UserDTO dto, @MappingTarget User user);
+
+
+5. Use List<UserDTO> toUserDTOList(List<User> users); for collections.
+
+
+
+
+---
+
+This setup ensures clean, efficient, and maintainable object mapping in your Spring Boot application. Let me know if you need further clarifications!
+
+
+
+
+
+
+
+
+
 import org.apache.spark.sql.{Dataset, Encoder, Encoders, SparkSession}
 import org.apache.spark.sql.functions._
 
