@@ -1,4 +1,63 @@
 ```
+import org.apache.spark.sql.{SparkSession, Dataset}
+import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
+import org.apache.spark.sql.Encoders
+import scala.util.{Try, Success, Failure}
+
+// Initialize SparkSession
+val spark = SparkSession.builder()
+  .appName("User to Employee Transformation")
+  .getOrCreate()
+
+// Import implicit encoders for Dataset
+import spark.implicits._
+
+// Import predefined classes from the JAR file
+import com.example.User // Replace with actual package and class name
+import com.example.Employee // Replace with actual package and class name
+import com.example.TransformationUtils // Replace with actual package and class name
+
+// Load the dataset (assuming it's in a DataFrame)
+val userDF = spark.read.parquet("path/to/user/data") // Replace with actual path
+
+// Create encoders for User and Employee
+implicit val userEncoder = ExpressionEncoder[User]
+implicit val employeeEncoder = ExpressionEncoder[Employee]
+
+// Initialize the predefined TransformationUtils class
+val transformationUtils = new TransformationUtils()
+
+// Transformation function: User => Employee (using the predefined method)
+def transformUserToEmployee(user: User): Employee = {
+  transformationUtils.transformUserToEmployee(user)
+}
+
+// Apply transformation with error handling
+val resultDS = userDF.as[User].map { user =>
+  Try(transformUserToEmployee(user)) match {
+    case Success(employee) => Right(employee)
+    case Failure(exception) => Left((user, exception.getMessage))
+  }
+}
+
+// Separate valid and error records
+val validRecords = resultDS.filter(_.isRight).map(_.right.get)
+val errorRecords = resultDS.filter(_.isLeft).map(_.left.get)
+
+// Write valid records to output
+validRecords.write.parquet("path/to/output/valid_employees") // Replace with actual path
+
+// Write error records to Parquet
+val errorDF = errorRecords.toDF("user", "errorMessage")
+errorDF.write.parquet("path/to/output/error_users") // Replace with actual path
+
+// Stop SparkSession
+spark.stop()
+
+
+
+
+
 Testing Strategy**
 
 ### **1. Unit Testing**
