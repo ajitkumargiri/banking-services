@@ -1,4 +1,45 @@
 ```
+Subject: Exciting Progress on Initial Load – A Step Forward!
+
+Dear Team,
+
+Good morning!
+
+I just wanted to take a moment to share some exciting progress with all of you. As you know, we have been working on the initial load using a new and somewhat risky approach. During our first POC, processing 1,000 records took around 8 minutes. However, after more than 20 iterations of code changes and optimizations, we have successfully executed our primary BC (Sec_Type1) in just 11 minutes.
+
+Currently, we have around 9 million Type1 records, and we managed to process all of them, with only 469 errors. This is a great validation of our approach, giving us confidence as we move forward. We have also scaled down our Databricks cluster for now, but upgrading it in the future will further enhance performance.
+
+This was just the transformation rule—there’s still a long way to go. We need to execute two full business rule runs and two partial runs, but we already have ideas on how to optimize them further.
+
+While this is only the first step, and we don’t know what challenges lie ahead, this milestone reassures us that we are on the right track. Thank you all for your dedication and effort in making this happen!
+
+Looking forward to tackling the next steps together.
+
+Best regards,
+[Your Name]
+
+
+
+
+
+
+
+
+
+
+Search
+
+Reason
+
+ChatGP
+
+
+
+
+
+
+
+
 import org.apache.spark.sql.{SparkSession, Dataset}
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.Encoders
