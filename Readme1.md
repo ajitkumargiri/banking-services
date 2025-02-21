@@ -1,4 +1,212 @@
 ```
+
+(Due to technical issues, the search service is temporarily unavailable.)
+
+To connect to an Azure SQL Database using a **Service Principal** in a **Spring Boot** application, you need to use the **Azure Identity** library to authenticate with the Service Principal and obtain an access token. This token is then used to establish a connection to the Azure SQL Database.
+
+Here’s how you can achieve this:
+
+---
+
+### **Steps to Connect Azure SQL Database Using Service Principal in Spring Boot**
+
+#### 1. **Add Dependencies**
+Add the following dependencies to your `pom.xml` file:
+
+```xml
+<dependencies>
+    <!-- Spring Boot Starter JDBC -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-jdbc</artifactId>
+    </dependency>
+
+    <!-- Azure Identity Library -->
+    <dependency>
+        <groupId>com.azure</groupId>
+        <artifactId>azure-identity</artifactId>
+        <version>1.7.0</version> <!-- Use the latest version -->
+    </dependency>
+
+    <!-- SQL Server JDBC Driver -->
+    <dependency>
+        <groupId>com.microsoft.sqlserver</groupId>
+        <artifactId>mssql-jdbc</artifactId>
+        <version>12.2.0.jre11</version> <!-- Use the latest version -->
+    </dependency>
+
+    <!-- Spring Boot Starter Web (optional, for REST APIs) -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+</dependencies>
+```
+
+---
+
+#### 2. **Configure Application Properties**
+Add the following properties to your `application.properties` file:
+
+```properties
+# Azure SQL Database Configuration
+spring.datasource.url=jdbc:sqlserver://<your-server-name>.database.windows.net:1433;database=<your-database-name>;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;
+spring.datasource.username=<your-service-principal-client-id>
+spring.datasource.password=<your-access-token>
+
+# Azure Service Principal Configuration
+azure.tenant-id=<your-tenant-id>
+azure.client-id=<your-client-id>
+azure.client-secret=<your-client-secret>
+```
+
+---
+
+#### 3. **Create a Bean to Generate Access Token**
+Create a configuration class to generate the access token using the Azure Identity library.
+
+```java
+import com.azure.identity.ClientSecretCredential;
+import com.azure.identity.ClientSecretCredentialBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class AzureConfig {
+
+    @Bean
+    public ClientSecretCredential clientSecretCredential() {
+        return new ClientSecretCredentialBuilder()
+                .tenantId("<your-tenant-id>")
+                .clientId("<your-client-id>")
+                .clientSecret("<your-client-secret>")
+                .build();
+    }
+
+    @Bean
+    public String accessToken(ClientSecretCredential clientSecretCredential) {
+        return clientSecretCredential
+                .getToken("https://database.windows.net/.default")
+                .block()
+                .getToken();
+    }
+}
+```
+
+---
+
+#### 4. **Override the DataSource Configuration**
+Override the default `DataSource` configuration to use the access token as the password.
+
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+
+import javax.sql.DataSource;
+
+@Configuration
+public class DataSourceConfig {
+
+    @Autowired
+    private String accessToken;
+
+    @Bean
+    public DataSource dataSource() {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setUrl("jdbc:sqlserver://<your-server-name>.database.windows.net:1433;database=<your-database-name>;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;");
+        dataSource.setUsername("<your-service-principal-client-id>");
+        dataSource.setPassword(accessToken); // Use the access token as the password
+        return dataSource;
+    }
+}
+```
+
+---
+
+#### 5. **Use the DataSource in Your Application**
+You can now use the `DataSource` in your Spring Boot application to execute queries.
+
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class AzureSqlService {
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    public List<Map<String, Object>> getData() {
+        return jdbcTemplate.queryForList("SELECT * FROM your_table");
+    }
+}
+```
+
+---
+
+#### 6. **Test the Connection**
+Create a REST controller to test the connection:
+
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.Map;
+
+@RestController
+public class TestController {
+
+    @Autowired
+    private AzureSqlService azureSqlService;
+
+    @GetMapping("/data")
+    public List<Map<String, Object>> getData() {
+        return azureSqlService.getData();
+    }
+}
+```
+
+---
+
+### **Key Points**
+1. **Service Principal Permissions**: Ensure the Service Principal has the necessary permissions to access the Azure SQL Database.
+2. **Token Expiry**: Access tokens expire after a certain time (usually 1 hour). You may need to refresh the token periodically.
+3. **Security**: Never hard-code sensitive information like `client-id`, `client-secret`, or `tenant-id` in your code. Use environment variables or Azure Key Vault.
+
+---
+
+### **Environment Variables (Optional)**
+Instead of hard-coding values in `application.properties`, you can use environment variables:
+
+```properties
+spring.datasource.username=${AZURE_CLIENT_ID}
+spring.datasource.password=${AZURE_ACCESS_TOKEN}
+azure.tenant-id=${AZURE_TENANT_ID}
+azure.client-id=${AZURE_CLIENT_ID}
+azure.client-secret=${AZURE_CLIENT_SECRET}
+```
+
+Set these environment variables in your system or deployment environment.
+
+---
+
+This setup allows your Spring Boot application to connect to Azure SQL Database using a Service Principal. Let me know if you need further assistance!
+
+
+
+
+
+
+
+
 Subject: Exciting Progress on Initial Load – A Step Forward!
 
 Dear Team,
