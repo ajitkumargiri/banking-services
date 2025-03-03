@@ -1,4 +1,491 @@
 ```
+Below is a detailed implementation guide for your 4-wheeler rental website using Vue.js, Firebase, Google Maps API, and WhatsApp integration, without payment functionality. This solution includes full code for components, Firebase setup, Google Maps distance calculation with route display, and deployment steps. I’ll use Tailwind CSS for styling and ensure the code is clean, well-commented, and ready for deployment via Firebase Hosting.
+
+Due to the complexity and length of the project, I’ll break it down into sections with explanations and provide the core code snippets. You can copy and adapt this into your project.
+
+Project Structure
+text
+
+
+
+four-wheeler-rental/
+├── public/
+│   ├── index.html
+│   └── favicon.ico
+├── src/
+│   ├── assets/
+│   │   └── logo.png
+│   ├── components/
+│   │   ├── CarCard.vue
+│   │   ├── BookingForm.vue
+│   │   └── AdminCarForm.vue
+│   ├── views/
+│   │   ├── Home.vue
+│   │   ├── Catalog.vue
+│   │   ├── Booking.vue
+│   │   └── AdminDashboard.vue
+│   ├── router/
+│   │   └── index.js
+│   ├── firebase/
+│   │   └── firebase.js
+│   ├── App.vue
+│   └── main.js
+├── tailwind.config.js
+├── package.json
+└── firebase.json
+Step 1: Setup Project
+Initialize Vue.js Project:
+bash
+
+
+
+npm install -g @vue/cli
+vue create four-wheeler-rental
+cd four-wheeler-rental
+npm install
+Install Dependencies:
+bash
+
+
+
+npm install firebase vue-router vuefire tailwindcss @tailwindcss/forms @tailwindcss/typography postcss autoprefixer axios
+npx tailwindcss init -p
+Configure Tailwind CSS: Edit tailwind.config.js:
+javascript
+
+
+
+module.exports = {
+  content: ["./src/**/*.{vue,js,ts}"],
+  theme: { extend: {} },
+  plugins: [require('@tailwindcss/forms'), require('@tailwindcss/typography')],
+};
+Add to src/assets/main.css:
+css
+
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+Firebase Setup:
+Go to Firebase Console, create a project, and enable Authentication (Email/Password, Google), Firestore, and Hosting.
+Copy your Firebase config and create src/firebase/firebase.js:
+javascript
+
+
+
+import { initializeApp } from "firebase/app";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID",
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const googleProvider = new GoogleAuthProvider();
+
+export { auth, db, googleProvider };
+Step 2: Vue Router
+Edit src/router/index.js:
+
+javascript
+
+
+
+import { createRouter, createWebHistory } from "vue-router";
+import Home from "../views/Home.vue";
+
+const routes = [
+  { path: "/", name: "Home", component: Home },
+  { path: "/catalog", name: "Catalog", component: () => import("../views/Catalog.vue") },
+  { path: "/booking/:carId", name: "Booking", component: () => import("../views/Booking.vue") },
+  { path: "/admin", name: "AdminDashboard", component: () => import("../views/AdminDashboard.vue"), meta: { requiresAdmin: true } },
+];
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes,
+});
+
+router.beforeEach((to, from, next) => {
+  const { auth } = require("../firebase/firebase");
+  const user = auth.currentUser;
+  if (to.meta.requiresAdmin && (!user || user.email !== "admin@example.com")) {
+    next("/"); // Redirect non-admins
+  } else {
+    next();
+  }
+});
+
+export default router;
+Step 3: Core Components and Views
+App.vue
+vue
+
+
+
+<template>
+  <div class="min-h-screen bg-gray-100">
+    <nav class="bg-blue-600 p-4 text-white">
+      <router-link to="/" class="mr-4">Home</router-link>
+      <router-link to="/catalog" class="mr-4">Catalog</router-link>
+      <router-link v-if="user" to="/admin" class="mr-4">Admin</router-link>
+      <button v-if="user" @click="logout" class="ml-4">Logout</button>
+      <button v-else @click="login" class="ml-4">Login</button>
+    </nav>
+    <router-view />
+  </div>
+</template>
+
+<script>
+import { auth, googleProvider } from "./firebase/firebase";
+import { signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
+
+export default {
+  data() {
+    return { user: null };
+  },
+  mounted() {
+    onAuthStateChanged(auth, (user) => (this.user = user));
+  },
+  methods: {
+    async login() {
+      await signInWithPopup(auth, googleProvider);
+    },
+    async logout() {
+      await signOut(auth);
+    },
+  },
+};
+</script>
+views/Home.vue
+vue
+
+
+
+<template>
+  <div class="container mx-auto p-4">
+    <h1 class="text-3xl font-bold">Welcome to 4-Wheeler Rentals</h1>
+    <p>Browse our catalog and book your ride today!</p>
+    <router-link to="/catalog" class="mt-4 inline-block bg-blue-600 text-white p-2 rounded">View Cars</router-link>
+  </div>
+</template>
+views/Catalog.vue
+vue
+
+
+
+<template>
+  <div class="container mx-auto p-4">
+    <h1 class="text-2xl font-bold mb-4">Car Catalog</h1>
+    <input v-model="search" placeholder="Search cars..." class="w-full p-2 mb-4 border rounded" />
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <CarCard v-for="car in filteredCars" :key="car.id" :car="car" />
+    </div>
+  </div>
+</template>
+
+<script>
+import { db } from "../firebase/firebase";
+import { collection, getDocs } from "firebase/firestore";
+import CarCard from "../components/CarCard.vue";
+
+export default {
+  components: { CarCard },
+  data() {
+    return { cars: [], search: "" };
+  },
+  computed: {
+    filteredCars() {
+      return this.cars.filter((car) =>
+        car.name.toLowerCase().includes(this.search.toLowerCase())
+      );
+    },
+  },
+  async mounted() {
+    const querySnapshot = await getDocs(collection(db, "cars"));
+    this.cars = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  },
+};
+</script>
+components/CarCard.vue
+vue
+
+
+
+<template>
+  <div class="border rounded p-4 bg-white shadow">
+    <img :src="car.image" alt="Car" class="w-full h-40 object-cover mb-2" />
+    <h2 class="text-xl font-bold">{{ car.name }}</h2>
+    <p>{{ car.description }}</p>
+    <p>Price: ${{ car.pricePerKm }} / km</p>
+    <p>{{ car.available ? "Available" : "Not Available" }}</p>
+    <router-link :to="`/booking/${car.id}`" class="mt-2 inline-block bg-blue-600 text-white p-2 rounded">
+      Book Now
+    </router-link>
+  </div>
+</template>
+
+<script>
+export default {
+  props: ["car"],
+};
+</script>
+views/Booking.vue
+vue
+
+
+
+<template>
+  <div class="container mx-auto p-4">
+    <h1 class="text-2xl font-bold mb-4">Book {{ car?.name }}</h1>
+    <BookingForm :car="car" @booking-confirmed="handleBooking" />
+    <div id="map" class="w-full h-64 mt-4"></div>
+  </div>
+</template>
+
+<script>
+import { db } from "../firebase/firebase";
+import { doc, getDoc } from "firebase/firestore";
+import BookingForm from "../components/BookingForm.vue";
+import axios from "axios";
+
+export default {
+  components: { BookingForm },
+  data() {
+    return { car: null, map: null };
+  },
+  async mounted() {
+    const carDoc = await getDoc(doc(db, "cars", this.$route.params.carId));
+    this.car = { id: carDoc.id, ...carDoc.data() };
+    this.initMap();
+  },
+  methods: {
+    initMap() {
+      const script = document.createElement("script");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap`;
+      script.async = true;
+      window.initMap = () => {
+        this.map = new google.maps.Map(document.getElementById("map"), {
+          center: { lat: -34.397, lng: 150.644 },
+          zoom: 8,
+        });
+      };
+      document.head.appendChild(script);
+    },
+    async handleBooking({ source, destination, distance, totalPrice }) {
+      const directionsService = new google.maps.DirectionsService();
+      const directionsRenderer = new google.maps.DirectionsRenderer();
+      directionsRenderer.setMap(this.map);
+
+      const request = {
+        origin: source,
+        destination: destination,
+        travelMode: "DRIVING",
+      };
+      directionsService.route(request, (result, status) => {
+        if (status === "OK") {
+          directionsRenderer.setDirections(result);
+        }
+      });
+    },
+  },
+};
+</script>
+components/BookingForm.vue
+vue
+
+
+
+<template>
+  <form @submit.prevent="submitBooking" class="space-y-4">
+    <input v-model="source" placeholder="Source" class="w-full p-2 border rounded" required />
+    <input v-model="destination" placeholder="Destination" class="w-full p-2 border rounded" required />
+    <button type="button" @click="calculateDistance" class="bg-blue-600 text-white p-2 rounded">Calculate Distance</button>
+    <p v-if="distance">Distance: {{ distance }} km | Total Price: ${{ totalPrice }}</p>
+    <button type="submit" class="bg-green-600 text-white p-2 rounded">Confirm Booking</button>
+    <a v-if="whatsappLink" :href="whatsappLink" target="_blank" class="block text-blue-600">Contact via WhatsApp</a>
+  </form>
+</template>
+
+<script>
+import { db, auth } from "../firebase/firebase";
+import { collection, addDoc } from "firebase/firestore";
+import axios from "axios";
+
+export default {
+  props: ["car"],
+  data() {
+    return { source: "", destination: "", distance: null, totalPrice: null, whatsappLink: null };
+  },
+  methods: {
+    async calculateDistance() {
+      const response = await axios.get(
+        `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${this.source}&destinations=${this.destination}&key=YOUR_GOOGLE_MAPS_API_KEY`
+      );
+      this.distance = response.data.rows[0].elements[0].distance.value / 1000; // Convert meters to km
+      this.totalPrice = (this.distance * this.car.pricePerKm).toFixed(2);
+    },
+    async submitBooking() {
+      if (!this.distance) return alert("Please calculate distance first!");
+      const booking = {
+        userId: auth.currentUser.uid,
+        carId: this.car.id,
+        source: this.source,
+        destination: this.destination,
+        distance: this.distance,
+        totalPrice: this.totalPrice,
+        timestamp: new Date(),
+      };
+      await addDoc(collection(db, "bookings"), booking);
+      this.whatsappLink = `https://wa.me/YOUR_PHONE_NUMBER?text=Booking%20for%20${this.car.name}%20from%20${this.source}%20to%20${this.destination}%20-%20$${this.totalPrice}`;
+      this.$emit("booking-confirmed", { source: this.source, destination: this.destination, distance: this.distance, totalPrice: this.totalPrice });
+    },
+  },
+};
+</script>
+views/AdminDashboard.vue
+vue
+
+
+
+<template>
+  <div class="container mx-auto p-4">
+    <h1 class="text-2xl font-bold mb-4">Admin Dashboard</h1>
+    <AdminCarForm @car-added="fetchCars" />
+    <div class="mt-4">
+      <h2 class="text-xl font-bold">Bookings</h2>
+      <ul>
+        <li v-for="booking in bookings" :key="booking.id" class="border p-2 mb-2">
+          {{ booking.carId }} - {{ booking.source }} to {{ booking.destination }} - ${{ booking.totalPrice }}
+        </li>
+      </ul>
+    </div>
+  </div>
+</template>
+
+<script>
+import { db } from "../firebase/firebase";
+import { collection, getDocs } from "firebase/firestore";
+import AdminCarForm from "../components/AdminCarForm.vue";
+
+export default {
+  components: { AdminCarForm },
+  data() {
+    return { bookings: [] };
+  },
+  async mounted() {
+    this.fetchBookings();
+  },
+  methods: {
+    async fetchBookings() {
+      const querySnapshot = await getDocs(collection(db, "bookings"));
+      this.bookings = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    },
+  },
+};
+</script>
+components/AdminCarForm.vue
+vue
+
+
+
+<template>
+  <form @submit.prevent="addCar" class="space-y-4">
+    <input v-model="name" placeholder="Car Name" class="w-full p-2 border rounded" required />
+    <input v-model="image" placeholder="Image URL" class="w-full p-2 border rounded" required />
+    <textarea v-model="description" placeholder="Description" class="w-full p-2 border rounded" required></textarea>
+    <input v-model="pricePerKm" type="number" placeholder="Price per km" class="w-full p-2 border rounded" required />
+    <input v-model="available" type="checkbox" /> Available
+    <button type="submit" class="bg-blue-600 text-white p-2 rounded">Add Car</button>
+  </form>
+</template>
+
+<script>
+import { db } from "../firebase/firebase";
+import { collection, addDoc } from "firebase/firestore";
+
+export default {
+  data() {
+    return { name: "", image: "", description: "", pricePerKm: "", available: true };
+  },
+  methods: {
+    async addCar() {
+      await addDoc(collection(db, "cars"), {
+        name: this.name,
+        image: this.image,
+        description: this.description,
+        pricePerKm: Number(this.pricePerKm),
+        available: this.available,
+      });
+      this.$emit("car-added");
+      this.name = this.image = this.description = this.pricePerKm = "";
+      this.available = true;
+    },
+  },
+};
+</script>
+Step 4: Deployment
+Build the Project:
+bash
+
+
+
+npm run build
+Initialize Firebase Hosting:
+bash
+
+
+
+npm install -g firebase-tools
+firebase login
+firebase init hosting
+Select your Firebase project.
+Set dist as the public directory.
+Configure as a single-page app (rewrite all URLs to /index.html).
+Deploy:
+bash
+
+
+
+firebase deploy
+Notes
+Replace YOUR_GOOGLE_MAPS_API_KEY with your Google Maps API key (enable Distance Matrix and Directions APIs).
+Replace YOUR_PHONE_NUMBER in the WhatsApp link with your number (e.g., +1234567890).
+The admin check is basic (email-based); enhance it with Firestore roles if needed.
+The design is responsive thanks to Tailwind CSS grid and flex utilities.
+Firestore rules should be set to secure data access (e.g., only authenticated users can read/write).
+This implementation meets all your requirements: user authentication, car catalog, booking with Google Maps distance and route display, WhatsApp integration, admin dashboard, and responsive design. Let me know if you need further clarification!
+
+
+
+
+
+
+
+How can Grok help?
+
+
+
+
+Grok 3
+
+
+
+
+
+
+
+
 
 (Due to technical issues, the search service is temporarily unavailable.)
 
